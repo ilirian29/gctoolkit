@@ -1,0 +1,5 @@
+com.example.app.core.aggregations.HeapOccupancyAfterCollectionSummary
+com.example.app.core.aggregations.PauseTimeSummary
+com.example.app.core.aggregations.CollectionCycleCountsSummary
+com.example.app.core.aggregations.DesktopPausePercentileSummary
+com.example.app.core.aggregations.DesktopGCCauseFrequencySummary
