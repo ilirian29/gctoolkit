@@ -1,5 +1,8 @@
 package com.yourorg.gcdesk.ui;
 
+import com.example.app.core.reporting.ReportFormat;
+import com.example.app.core.reporting.ReportGenerationException;
+import com.example.app.core.reporting.ReportService;
 import com.microsoft.gctoolkit.event.GCCause;
 import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.yourorg.gcdesk.model.AnalysisResult;
@@ -20,9 +23,13 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 
 import java.nio.file.Path;
 import java.time.ZoneId;
@@ -50,6 +57,15 @@ public class ResultsDashboardController {
 
     @FXML
     private Label summaryWarningBadge;
+
+    @FXML
+    private ComboBox<ReportFormat> exportFormatChoice;
+
+    @FXML
+    private Button exportButton;
+
+    @FXML
+    private Label exportStatusLabel;
 
     @FXML
     private LineChart<Number, Number> heapOccupancyChart;
@@ -101,6 +117,8 @@ public class ResultsDashboardController {
 
     private final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .withLocale(Locale.getDefault());
+    private ReportService reportService = new ReportService();
+    private AnalysisResult currentResult;
 
     @FXML
     private void initialize() {
@@ -120,6 +138,18 @@ public class ResultsDashboardController {
         heapOccupancyChart.setAnimated(false);
         heapOccupancyChart.setLegendVisible(true);
         heapOccupancyChart.setCreateSymbols(false);
+
+        if (exportFormatChoice != null) {
+            exportFormatChoice.setItems(FXCollections.observableArrayList(ReportFormat.values()));
+            exportFormatChoice.getSelectionModel().select(ReportFormat.PDF);
+            exportFormatChoice.valueProperty().addListener((obs, oldValue, newValue) -> updateExportControls());
+        }
+        if (exportButton != null) {
+            exportButton.setDisable(true);
+        }
+        if (exportStatusLabel != null) {
+            exportStatusLabel.setText("Generate a report once analysis results are available.");
+        }
     }
 
     /**
@@ -141,6 +171,51 @@ public class ResultsDashboardController {
         populateCauseTables(result.getGcCauseSummary());
         populateCycleTable(result.getCollectionCycleSummary());
         populateSummary(result.getPauseStatistics());
+
+        currentResult = result;
+        if (exportStatusLabel != null) {
+            exportStatusLabel.setText("Ready to export a report.");
+        }
+        updateExportControls();
+    }
+
+    @FXML
+    private void onExportReport() {
+        if (currentResult == null) {
+            updateExportStatus("Run an analysis before exporting a report.");
+            return;
+        }
+        if (reportService == null) {
+            updateExportStatus("Report service is not configured.");
+            return;
+        }
+        ReportFormat format = exportFormatChoice != null ? exportFormatChoice.getValue() : ReportFormat.PDF;
+        if (format == null) {
+            updateExportStatus("Select a report format before exporting.");
+            return;
+        }
+        Window window = exportButton != null && exportButton.getScene() != null
+                ? exportButton.getScene().getWindow()
+                : null;
+        if (window == null) {
+            updateExportStatus("Unable to open directory chooser.");
+            return;
+        }
+
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("Select export directory");
+        java.io.File directory = chooser.showDialog(window);
+        if (directory == null) {
+            updateExportStatus("Export cancelled.");
+            return;
+        }
+
+        try {
+            Path reportPath = reportService.generateReport(currentResult, directory.toPath(), format);
+            updateExportStatus("Report saved to " + reportPath.getFileName());
+        } catch (ReportGenerationException ex) {
+            updateExportStatus("Export failed: " + ex.getMessage());
+        }
     }
 
     private void populateHeapOccupancy(HeapOccupancySummary summary) {
@@ -231,6 +306,27 @@ public class ResultsDashboardController {
     private void hideSummaryWarning() {
         summaryWarningBadge.setManaged(false);
         summaryWarningBadge.setVisible(false);
+    }
+
+    public void setReportService(ReportService reportService) {
+        this.reportService = Objects.requireNonNull(reportService, "reportService");
+        updateExportControls();
+    }
+
+    private void updateExportControls() {
+        if (exportButton != null) {
+            boolean disable = currentResult == null;
+            if (exportFormatChoice != null) {
+                disable = disable || exportFormatChoice.getSelectionModel().isEmpty();
+            }
+            exportButton.setDisable(disable);
+        }
+    }
+
+    private void updateExportStatus(String message) {
+        if (exportStatusLabel != null) {
+            exportStatusLabel.setText(message);
+        }
     }
 
     /**
