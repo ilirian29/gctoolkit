@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GC Desk Preferences",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "theme": {
+      "type": "string",
+      "enum": ["LIGHT", "DARK", "SYSTEM"]
+    },
+    "defaultExportDirectory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "analysisConcurrency": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recentAnalyses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "displayName": {
+                "type": "string"
+              },
+              "group": {
+                "type": ["string", "null"],
+                "minLength": 1
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              },
+              "lastOpened": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": ["path", "displayName", "tags", "lastOpened"]
+          }
+        }
+      },
+      "required": ["recentAnalyses"]
+    }
+  },
+  "required": ["theme", "defaultExportDirectory", "analysisConcurrency", "workspace"]
+}

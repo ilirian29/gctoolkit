@@ -30,6 +30,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Window;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -120,6 +121,7 @@ public class ResultsDashboardController {
     private ReportService reportService = new ReportService();
     private AnalysisResult currentResult;
     private Supplier<DirectoryChooserAdapter> directoryChooserFactory = FXDirectoryChooserAdapter::new;
+    private Path defaultExportDirectory;
 
     @FXML
     private void initialize() {
@@ -205,6 +207,9 @@ public class ResultsDashboardController {
 
         DirectoryChooserAdapter chooser = directoryChooserFactory.get();
         chooser.setTitle("Select export directory");
+        if (defaultExportDirectory != null && Files.isDirectory(defaultExportDirectory)) {
+            chooser.setInitialDirectory(defaultExportDirectory.toFile());
+        }
         java.io.File directory = chooser.showDialog(window);
         if (directory == null) {
             updateExportStatus("Export cancelled.");
@@ -213,6 +218,7 @@ public class ResultsDashboardController {
 
         try {
             Path reportPath = reportService.generateReport(currentResult, directory.toPath(), format);
+            defaultExportDirectory = directory.toPath();
             updateExportStatus("Report saved to " + reportPath.getFileName());
         } catch (ReportGenerationException ex) {
             updateExportStatus("Export failed: " + ex.getMessage());
@@ -318,6 +324,10 @@ public class ResultsDashboardController {
         this.directoryChooserFactory = Objects.requireNonNull(directoryChooserFactory, "directoryChooserFactory");
     }
 
+    public void setDefaultExportDirectory(Path defaultExportDirectory) {
+        this.defaultExportDirectory = defaultExportDirectory;
+    }
+
     private void updateExportControls() {
         if (exportButton != null) {
             boolean disable = currentResult == null;
@@ -406,6 +416,8 @@ public class ResultsDashboardController {
         void setTitle(String title);
 
         java.io.File showDialog(Window owner);
+
+        void setInitialDirectory(java.io.File directory);
     }
 
     private static class FXDirectoryChooserAdapter implements DirectoryChooserAdapter {
@@ -419,6 +431,13 @@ public class ResultsDashboardController {
         @Override
         public java.io.File showDialog(Window owner) {
             return delegate.showDialog(owner);
+        }
+
+        @Override
+        public void setInitialDirectory(java.io.File directory) {
+            if (directory != null && directory.exists()) {
+                delegate.setInitialDirectory(directory);
+            }
         }
     }
 }

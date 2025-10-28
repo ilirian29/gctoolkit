@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.yourorg.gcdesk.ui.WorkspaceController"
+            prefWidth="280" stylesheets="@styles.css">
+    <top>
+        <VBox spacing="8" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="16" right="12" bottom="12" left="12"/>
+            </padding>
+            <children>
+                <Label text="Workspace" styleClass="header-label"/>
+                <HBox spacing="6" alignment="CENTER_LEFT">
+                    <children>
+                        <ComboBox fx:id="groupFilter" promptText="All groups" prefWidth="140"/>
+                        <TextField fx:id="tagFilterField" promptText="Filter tags" HBox.hgrow="ALWAYS"/>
+                        <Button text="Clear" onAction="#onClearFilters"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <TreeView fx:id="workspaceTree" showRoot="false">
+            <BorderPane.margin>
+                <Insets left="12" right="12"/>
+            </BorderPane.margin>
+        </TreeView>
+    </center>
+    <bottom>
+        <VBox spacing="8" BorderPane.alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="12" right="12" bottom="16" left="12"/>
+            </padding>
+            <children>
+                <Label text="Metadata" styleClass="subheader-label"/>
+                <TextField fx:id="groupField" promptText="Group"/>
+                <TextField fx:id="tagsField" promptText="Comma-separated tags"/>
+                <HBox spacing="8" alignment="CENTER_RIGHT">
+                    <children>
+                        <Button fx:id="openButton" text="Open" onAction="#onOpenSelected" disable="true"/>
+                        <Button text="Update" onAction="#onUpdateMetadata"/>
+                    </children>
+                </HBox>
+                <Label fx:id="statusLabel" wrapText="true" styleClass="workspace-status"/>
+            </children>
+        </VBox>
+    </bottom>
+</BorderPane>

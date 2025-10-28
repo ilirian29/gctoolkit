@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<DialogPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.yourorg.gcdesk.ui.SettingsDialogController"
+            headerText="Preferences" stylesheets="@styles.css">
+    <content>
+        <VBox spacing="12">
+            <padding>
+                <Insets top="16" right="16" bottom="8" left="16"/>
+            </padding>
+            <children>
+                <GridPane hgap="12" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT" prefWidth="150"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+                    <children>
+                        <Label text="Theme" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <ChoiceBox fx:id="themeChoice" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="Export directory" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <children>
+                                <TextField fx:id="exportDirectoryField" HBox.hgrow="ALWAYS" promptText="/path/to/exports"/>
+                                <Button text="Browse" onAction="#onBrowseExport"/>
+                            </children>
+                        </HBox>
+
+                        <Label text="Analysis concurrency" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <Spinner fx:id="concurrencySpinner" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="120"/>
+                    </children>
+                </GridPane>
+                <Label fx:id="errorLabel" managed="false" visible="false" wrapText="true" styleClass="error-label"/>
+            </children>
+        </VBox>
+    </content>
+    <buttonTypes>
+        <ButtonType text="Cancel" buttonData="CANCEL_CLOSE"/>
+        <ButtonType text="Save" buttonData="OK_DONE"/>
+    </buttonTypes>
+</DialogPane>
