@@ -6,6 +6,7 @@ module com.yourorg.gcdesk.ui {
 
     requires com.yourorg.gcdesk.core;
     requires com.microsoft.gctoolkit.api;
+    requires org.slf4j;
 
     exports com.yourorg.gcdesk.ui;
     opens com.yourorg.gcdesk.ui to javafx.fxml;

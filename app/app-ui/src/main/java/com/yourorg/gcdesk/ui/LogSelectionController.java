@@ -1,13 +1,19 @@
 package com.yourorg.gcdesk.ui;
 
+import com.example.app.core.logging.Logging;
+import com.yourorg.gcdesk.AnalysisException;
 import com.yourorg.gcdesk.AnalysisService;
+import com.yourorg.gcdesk.CrashReportService;
 import com.yourorg.gcdesk.model.AnalysisResult;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -17,7 +23,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Controller backing the log selection screen. It validates user input, surfaces warnings and
@@ -25,6 +33,8 @@ import java.util.function.Consumer;
  * result rendering to collaborators.
  */
 public class LogSelectionController {
+
+    private static final org.slf4j.Logger LOGGER = Logging.getLogger(LogSelectionController.class);
 
     @FXML
     private TextField logPathField;
@@ -42,6 +52,7 @@ public class LogSelectionController {
     private Label warningBadge;
 
     private AnalysisService analysisService = new AnalysisService();
+    private CrashReportService crashReportService = new CrashReportService();
     private AnalysisProgressController progressController;
     private Stage progressDialogStage;
     private Consumer<AnalysisResult> onAnalysisCompleted;
@@ -163,21 +174,77 @@ public class LogSelectionController {
     }
 
     private void handleFailure(Path path, Throwable throwable) {
+        Throwable cause = unwrap(throwable);
         String message;
-        if (throwable instanceof java.util.concurrent.CancellationException) {
+        AnalysisException analysisException = null;
+        if (cause instanceof java.util.concurrent.CancellationException) {
             message = "Analysis cancelled.";
-        } else if (throwable instanceof IOException) {
+        } else if (cause instanceof AnalysisException exception) {
+            analysisException = exception;
+            message = exception.getFriendlyMessage();
+            LOGGER.warn("Analysis failed: {}", exception.describeContext(), exception);
+        } else if (cause instanceof IOException) {
             message = "Unable to read GC log: " + path.getFileName();
-        } else if (throwable != null && throwable.getMessage() != null && !throwable.getMessage().isBlank()) {
-            message = "Analysis failed: " + throwable.getMessage();
+            LOGGER.error("Failed to read GC log {}", path, cause);
+        } else if (cause != null && cause.getMessage() != null && !cause.getMessage().isBlank()) {
+            message = "Analysis failed: " + cause.getMessage();
+            LOGGER.error("Analysis failed for {}", path, cause);
         } else {
             message = "Analysis failed: unknown error";
+            LOGGER.error("Analysis failed for {} with unknown cause", path);
         }
         showWarning(message);
         statusLabel.setText(message);
         if (onAnalysisFailed != null) {
-            onAnalysisFailed.accept(throwable);
+            onAnalysisFailed.accept(cause);
         }
+        if (analysisException != null) {
+            offerCrashReport(analysisException);
+        }
+    }
+
+    private Throwable unwrap(Throwable throwable) {
+        if (throwable instanceof ExecutionException executionException && executionException.getCause() != null) {
+            return executionException.getCause();
+        }
+        return throwable;
+    }
+
+    private void offerCrashReport(AnalysisException exception) {
+        if (crashReportService == null) {
+            return;
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Send diagnostics to support");
+        alert.setHeaderText("Generate a crash report?");
+        alert.setContentText("We can package the selected log, configuration, and system details. " +
+                "No information will be sent without your consent.");
+        ButtonType generate = new ButtonType("Generate report", ButtonBar.ButtonData.OK_DONE);
+        ButtonType decline = new ButtonType("No thanks", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(generate, decline);
+
+        Optional<ButtonType> response = alert.showAndWait();
+        if (response.isPresent() && response.get() == generate) {
+            try {
+                Path archive = crashReportService.packageForSupport(exception);
+                Alert success = new Alert(Alert.AlertType.INFORMATION);
+                success.setTitle("Crash report ready");
+                success.setHeaderText("Diagnostics packaged");
+                success.setContentText("Attach the archive located at:\n" + archive.toAbsolutePath());
+                success.showAndWait();
+            } catch (IOException e) {
+                LOGGER.error("Unable to package crash report", e);
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Crash report failed");
+                errorAlert.setHeaderText("We couldn't package the crash report");
+                errorAlert.setContentText(e.getMessage() != null ? e.getMessage() : "Unknown error");
+                errorAlert.showAndWait();
+            }
+        }
+    }
+
+    public void setCrashReportService(CrashReportService crashReportService) {
+        this.crashReportService = Objects.requireNonNull(crashReportService, "crashReportService");
     }
 
     private void showWarning(String message) {

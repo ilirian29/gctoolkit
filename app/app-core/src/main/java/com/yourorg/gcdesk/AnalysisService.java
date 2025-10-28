@@ -6,6 +6,7 @@ import com.example.app.core.aggregations.DesktopPausePercentileSummary;
 import com.example.app.core.aggregations.HeapOccupancyAfterCollectionSummary;
 import com.example.app.core.aggregations.PauseTimeSummary;
 import com.example.app.core.collections.XYDataSet;
+import com.example.app.core.logging.Logging;
 import com.microsoft.gctoolkit.GCToolKit;
 import com.microsoft.gctoolkit.io.GCLogFile;
 import com.microsoft.gctoolkit.io.RotatingGCLogFile;
@@ -32,10 +33,14 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+
 /**
  * Service responsible for analysing GC logs and caching the resulting aggregations.
  */
 public class AnalysisService {
+
+    private static final Logger LOGGER = Logging.getLogger(AnalysisService.class);
 
     private final Map<UUID, AnalysisResult> analysisCache = new ConcurrentHashMap<>();
     private final Map<Path, UUID> pathIndex = new ConcurrentHashMap<>();
@@ -48,7 +53,7 @@ public class AnalysisService {
      * @return aggregated analysis result
      * @throws IOException if reading the log fails
      */
-    public AnalysisResult analyze(Path logFilePath) throws IOException {
+    public AnalysisResult analyze(Path logFilePath) throws IOException, AnalysisException {
         Objects.requireNonNull(logFilePath, "logFilePath");
         Path normalized = logFilePath.toAbsolutePath().normalize();
 
@@ -56,6 +61,7 @@ public class AnalysisService {
         if (cachedId != null) {
             AnalysisResult cachedResult = analysisCache.get(cachedId);
             if (cachedResult != null) {
+                LOGGER.debug("Returning cached analysis for {}", normalized);
                 return cachedResult;
             }
         }
@@ -63,13 +69,35 @@ public class AnalysisService {
         GCLogFile logFile = createLogFile(normalized);
         GCToolKit toolKit = new GCToolKit();
         toolKit.loadAggregationsFromServiceLoader();
-        JavaVirtualMachine machine = toolKit.analyze(logFile);
+        JavaVirtualMachine machine = null;
+        try {
+            LOGGER.info("Starting GC analysis for {}", normalized);
+            machine = toolKit.analyze(logFile);
+            String collectorType = determineCollectorType(machine);
+            LOGGER.debug("GC analysis collector identified as {} for {}", collectorType, normalized);
 
-        UUID analysisId = UUID.randomUUID();
-        AnalysisResult result = buildAnalysisResult(analysisId, normalized, machine);
-        analysisCache.put(analysisId, result);
-        pathIndex.put(normalized, analysisId);
-        return result;
+            UUID analysisId = UUID.randomUUID();
+            AnalysisResult result = buildAnalysisResult(analysisId, normalized, machine);
+            analysisCache.put(analysisId, result);
+            pathIndex.put(normalized, analysisId);
+            LOGGER.info("GC analysis complete for {}", normalized);
+            return result;
+        } catch (IOException ex) {
+            LOGGER.error("I/O error while analysing {}", normalized, ex);
+            throw ex;
+        } catch (RuntimeException ex) {
+            String collectorType = determineCollectorType(machine);
+            String logLabel = normalized.getFileName() != null ? normalized.getFileName().toString() : normalized.toString();
+            String message = "We couldn't analyse " + logLabel;
+            if (!"unknown".equalsIgnoreCase(collectorType)) {
+                message += " for " + collectorType + " logs.";
+            } else {
+                message += ".";
+            }
+            AnalysisException analysisException = new AnalysisException(message, normalized, collectorType, ex);
+            LOGGER.error("Analysis failure: {}", analysisException.describeContext(), ex);
+            throw analysisException;
+        }
     }
 
     /**
@@ -141,5 +169,30 @@ public class AnalysisService {
         double p99Pause = percentiles != null ? percentiles.getP99Pause() : 0.0d;
         double maxPause = percentiles != null ? percentiles.getMaxPause().orElse(0.0d) : 0.0d;
         return new PauseStatistics(totalPauseTime, percentPaused, averagePause, medianPause, p90Pause, p99Pause, maxPause);
+    }
+
+    private String determineCollectorType(JavaVirtualMachine machine) {
+        if (machine == null) {
+            return "unknown";
+        }
+        if (machine.isZGC()) {
+            return "ZGC";
+        }
+        if (machine.isShenandoah()) {
+            return "Shenandoah";
+        }
+        if (machine.isG1GC()) {
+            return "G1";
+        }
+        if (machine.isParallel()) {
+            return "Parallel";
+        }
+        if (machine.isCMS()) {
+            return "CMS";
+        }
+        if (machine.isSerial()) {
+            return "Serial";
+        }
+        return "unknown";
     }
 }

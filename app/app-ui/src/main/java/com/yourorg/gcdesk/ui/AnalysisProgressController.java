@@ -1,5 +1,6 @@
 package com.yourorg.gcdesk.ui;
 
+import com.yourorg.gcdesk.AnalysisException;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -101,9 +102,14 @@ public class AnalysisProgressController {
         cancelButton.setDisable(true);
         boolean cancelled = throwable instanceof CancellationException;
         messageLabel.setText(cancelled ? "Analysis cancelled" : "Analysis failed");
-        String message = throwable != null && throwable.getMessage() != null && !throwable.getMessage().isBlank()
-                ? throwable.getMessage()
-                : (cancelled ? "Analysis cancelled" : "Unknown error");
+        String message;
+        if (throwable instanceof AnalysisException analysisException) {
+            message = analysisException.getFriendlyMessage();
+        } else if (throwable != null && throwable.getMessage() != null && !throwable.getMessage().isBlank()) {
+            message = throwable.getMessage();
+        } else {
+            message = cancelled ? "Analysis cancelled" : "Unknown error";
+        }
         showWarning(message);
         if (onFailure != null) {
             onFailure.accept(throwable);
