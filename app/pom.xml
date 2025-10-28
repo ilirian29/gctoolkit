@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <gctoolkit.version>3.7.0</gctoolkit.version>
+        <gctoolkit.version>3.7.1-SNAPSHOT</gctoolkit.version>
         <freemarker.version>2.3.32</freemarker.version>
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
         <xchart.version>3.8.6</xchart.version>
