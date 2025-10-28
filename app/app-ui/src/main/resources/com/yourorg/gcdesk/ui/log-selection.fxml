@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.yourorg.gcdesk.ui.LogSelectionController" spacing="10" alignment="CENTER_LEFT"
+      stylesheets="@styles.css" prefWidth="800">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20" />
+    </padding>
+    <children>
+        <Label text="Choose a GC log" styleClass="header-label" />
+        <Label text="Point the analyzer at a GC log file or directory to begin." wrapText="true" />
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <children>
+                <TextField fx:id="logPathField" promptText="/path/to/gc.log" HBox.hgrow="ALWAYS" />
+                <Button fx:id="browseButton" text="Browse" onAction="#onBrowse" />
+            </children>
+        </HBox>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <children>
+                <Button fx:id="analyzeButton" text="Analyze" onAction="#onAnalyze" />
+                <Label fx:id="warningBadge" visible="false" managed="false" styleClass="warning-badge" />
+            </children>
+        </HBox>
+        <Label fx:id="statusLabel" text="Select a GC log to begin." wrapText="true" />
+    </children>
+</VBox>

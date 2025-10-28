@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.yourorg.gcdesk.ui.ResultsDashboardController" stylesheets="@styles.css">
+    <top>
+        <VBox spacing="6" padding="10">
+            <children>
+                <Label text="Analysis results" styleClass="header-label" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Source:" />
+                        <Label fx:id="sourceLabel" text="-" />
+                    </children>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Analyzed:" />
+                        <Label fx:id="analyzedAtLabel" text="-" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Timelines">
+                    <content>
+                        <BorderPane padding="10">
+                            <top>
+                                <Label fx:id="timelineWarningBadge" visible="false" managed="false" styleClass="warning-badge" />
+                            </top>
+                            <center>
+                                <LineChart fx:id="heapOccupancyChart" animated="false">
+                                    <xAxis>
+                                        <NumberAxis label="Time (s)" />
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Heap occupancy (MB)" />
+                                    </yAxis>
+                                </LineChart>
+                            </center>
+                        </BorderPane>
+                    </content>
+                </Tab>
+                <Tab text="Tables">
+                    <content>
+                        <SplitPane orientation="VERTICAL">
+                            <items>
+                                <VBox spacing="6" padding="10">
+                                    <children>
+                                        <Label text="GC cause breakdown" styleClass="subheader-label" />
+                                        <TableView fx:id="causeTable" prefHeight="250">
+                                            <columns>
+                                                <TableColumn fx:id="causeColumn" text="Cause" prefWidth="260" />
+                                                <TableColumn fx:id="causeCountColumn" text="Events" prefWidth="100" />
+                                                <TableColumn fx:id="causeAverageDurationColumn" text="Avg duration (ms)" prefWidth="160" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="6" padding="10">
+                                    <children>
+                                        <Label text="Collection cycle counts" styleClass="subheader-label" />
+                                        <TableView fx:id="cycleTable" prefHeight="200">
+                                            <columns>
+                                                <TableColumn fx:id="cycleTypeColumn" text="GC type" prefWidth="220" />
+                                                <TableColumn fx:id="cycleCountColumn" text="Count" prefWidth="100" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
+                            </items>
+                        </SplitPane>
+                    </content>
+                </Tab>
+                <Tab text="Summary">
+                    <content>
+                        <VBox spacing="12" padding="10">
+                            <children>
+                                <Label fx:id="summaryWarningBadge" visible="false" managed="false" styleClass="warning-badge" />
+                                <GridPane hgap="12" vgap="8">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="40" />
+                                        <ColumnConstraints percentWidth="60" />
+                                    </columnConstraints>
+                                    <children>
+                                        <Label text="Total pause time" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                                        <Label fx:id="totalPauseLabel" text="0.00 ms" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                                        <Label text="Percent paused" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                                        <Label fx:id="percentPausedLabel" text="0.00 %" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+                                        <Label text="Average pause" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                                        <Label fx:id="averagePauseLabel" text="0.00 ms" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+                                        <Label text="Median pause" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+                                        <Label fx:id="medianPauseLabel" text="0.00 ms" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+                                        <Label text="P90 pause" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+                                        <Label fx:id="p90PauseLabel" text="0.00 ms" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+                                        <Label text="P99 pause" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+                                        <Label fx:id="p99PauseLabel" text="0.00 ms" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+                                        <Label text="Max pause" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+                                        <Label fx:id="maxPauseLabel" text="0.00 ms" GridPane.rowIndex="6" GridPane.columnIndex="1" />
+                                    </children>
+                                </GridPane>
+                                <Label text="Cause distribution" styleClass="subheader-label" />
+                                <PieChart fx:id="causeDistributionChart" prefHeight="260" />
+                            </children>
+                        </VBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>

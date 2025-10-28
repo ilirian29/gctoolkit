@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.yourorg.gcdesk.ui.AnalysisProgressController" spacing="12" alignment="CENTER_LEFT"
+      stylesheets="@styles.css">
+    <padding>
+        <Insets top="20" right="24" bottom="20" left="24" />
+    </padding>
+    <children>
+        <Label text="Analysing GC log" styleClass="header-label" />
+        <Label fx:id="messageLabel" text="Preparing..." wrapText="true" />
+        <ProgressBar fx:id="progressBar" prefWidth="360" progress="0" />
+        <Label fx:id="warningBadge" visible="false" managed="false" styleClass="warning-badge" />
+        <HBox alignment="CENTER_RIGHT" spacing="10" prefWidth="360">
+            <children>
+                <Button fx:id="cancelButton" text="Cancel" onAction="#onCancel" />
+            </children>
+        </HBox>
+    </children>
+</VBox>
