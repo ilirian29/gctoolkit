@@ -13,7 +13,7 @@ This guide explains how the desktop experience in this repository is organized, 
 | `app/app-ui` | JavaFX front-end, controllers, and FXML layouts for the GC analysis desktop experience.【F:app/app-ui/src/main/java/com/yourorg/gcdesk/ui/GCDeskApplication.java†L1-L69】【F:app/app-ui/src/main/resources/com/yourorg/gcdesk/ui/results-dashboard.fxml†L1-L139】 |
 | `app/packaging` | Launchers and platform-specific packaging glue, including the shaded entry point used for distribution.【F:app/packaging/src/main/java/com/yourorg/gcdesk/DesktopLauncher.java†L1-L17】 |
 | `sample` | Stand-alone examples that demonstrate how to call the toolkit directly from the command line.【F:sample/README.md†L1-L80】 |
-| `gclogs` | Curated sample logs for regression and exploratory testing. |
+| `resources/gclogs` | Curated sample logs for regression and exploratory testing. |
 
 Each Maven module has its own `pom.xml` and can be built independently. Use the module-level POMs when iterating locally and the root `pom.xml` for full builds.
 
@@ -73,7 +73,7 @@ sequenceDiagram
 - **Null-safety:** Leverage `Objects.requireNonNull` for mandatory parameters and `Optional` for nullable returns, following the patterns in `AnalysisService`.【F:app/app-core/src/main/java/com/yourorg/gcdesk/AnalysisService.java†L59-L121】
 - **Collections:** Prefer immutable or unmodifiable views when exposing data to other modules. See the use of `Collectors.toUnmodifiableList()` in the heap occupancy transformation.【F:app/app-core/src/main/java/com/yourorg/gcdesk/AnalysisService.java†L104-L115】
 - **Threading:** Cache access uses `ConcurrentHashMap`; follow the same approach for shared state and avoid synchronizing on arbitrary objects.【F:app/app-core/src/main/java/com/yourorg/gcdesk/AnalysisService.java†L46-L83】
-- **Testing:** Mirror the structure in `app/app-core/src/test/java` and keep integration tests under `.../integration` packages. Favor descriptive method names and rely on the existing sample logs under `gclogs/` for fixtures.
+- **Testing:** Mirror the structure in `app/app-core/src/test/java` and keep integration tests under `.../integration` packages. Favor descriptive method names and rely on the curated fixtures in `resources/gclogs/` for sample logs.
 
 ## Extensibility Templates
 
