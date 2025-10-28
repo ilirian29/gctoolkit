@@ -5,6 +5,7 @@ package com.example.app.core.reporting;
  */
 public enum ReportFormat {
 
+    HTML("HTML document", "html"),
     PDF("PDF document", "pdf");
 
     private final String displayName;

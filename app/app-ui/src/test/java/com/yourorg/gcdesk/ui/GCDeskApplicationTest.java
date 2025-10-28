@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(ApplicationExtension.class)
 class GCDeskApplicationTest extends ApplicationTest {
 
-    private static final Path SAMPLE_LOG = Path.of("..", "..", "gclogs", "samples", "g1-sample.log")
+    private static final Path SAMPLE_LOG = Path.of("..", "..", "resources", "gclogs", "large", "gc.log")
             .toAbsolutePath().normalize();
 
     private LogSelectionController logSelectionController;
