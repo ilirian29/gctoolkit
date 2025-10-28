@@ -6,6 +6,9 @@ module com.yourorg.gcdesk.core {
     requires openhtmltopdf.pdfbox;
     requires org.knowm.xchart;
     requires java.desktop;
+    requires org.slf4j;
+    requires ch.qos.logback.classic;
+    requires ch.qos.logback.core;
 
     exports com.yourorg.gcdesk;
     exports com.yourorg.gcdesk.model;
@@ -13,6 +16,7 @@ module com.yourorg.gcdesk.core {
     exports com.example.app.core.aggregations;
     exports com.example.app.core.collections;
     exports com.example.app.core.reporting;
+    exports com.example.app.core.logging;
 
     provides com.microsoft.gctoolkit.aggregator.Aggregation with
             com.example.app.core.aggregations.HeapOccupancyAfterCollectionSummary,

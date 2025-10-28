@@ -2,6 +2,7 @@ package com.yourorg.gcdesk.ui;
 
 import com.example.app.core.reporting.ReportService;
 import com.yourorg.gcdesk.AnalysisService;
+import com.yourorg.gcdesk.CrashReportService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -43,8 +44,10 @@ public class GCDeskApplication extends Application {
         progressController.setOnDismiss(progressStage::hide);
 
         AnalysisService analysisService = new AnalysisService();
+        CrashReportService crashReportService = new CrashReportService();
         ReportService reportService = new ReportService();
         logSelectionController.setAnalysisService(analysisService);
+        logSelectionController.setCrashReportService(crashReportService);
         logSelectionController.setAnalysisProgressController(progressController);
         logSelectionController.setProgressDialogStage(progressStage);
         logSelectionController.setOnAnalysisCompleted(result -> {

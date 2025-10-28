@@ -1,5 +1,6 @@
 package com.yourorg.gcdesk.testing;
 
+import com.yourorg.gcdesk.AnalysisException;
 import com.yourorg.gcdesk.AnalysisService;
 import com.yourorg.gcdesk.model.AnalysisResult;
 
@@ -46,6 +47,8 @@ public final class AnalysisFixtures {
             return service.analyze(SAMPLE_LOG);
         } catch (IOException e) {
             throw new UncheckedIOException("Unable to analyse sample log at " + SAMPLE_LOG, e);
+        } catch (AnalysisException e) {
+            throw new IllegalStateException("Unexpected analysis failure for sample log", e);
         }
     }
 }
