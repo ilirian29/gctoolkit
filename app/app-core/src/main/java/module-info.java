@@ -5,6 +5,10 @@ module com.yourorg.gcdesk.core {
     requires freemarker;
     requires openhtmltopdf.pdfbox;
     requires org.knowm.xchart;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
+    requires org.everit.json.schema;
+    requires org.json;
     requires java.desktop;
     requires org.slf4j;
     requires ch.qos.logback.classic;
@@ -17,6 +21,7 @@ module com.yourorg.gcdesk.core {
     exports com.example.app.core.collections;
     exports com.example.app.core.reporting;
     exports com.example.app.core.logging;
+    exports com.yourorg.gcdesk.preferences;
 
     provides com.microsoft.gctoolkit.aggregator.Aggregation with
             com.example.app.core.aggregations.HeapOccupancyAfterCollectionSummary,

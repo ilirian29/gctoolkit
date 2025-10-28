@@ -169,6 +169,11 @@ class GCDeskApplicationTest extends ApplicationTest {
                 return null;
             }
         }
+
+        @Override
+        public void setInitialDirectory(java.io.File directory) {
+            // no-op for tests
+        }
     }
 
     private static class RecordingReportService extends ReportService {

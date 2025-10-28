@@ -24,8 +24,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 /**
  * Controller backing the log selection screen. It validates user input, surfaces warnings and
@@ -57,6 +58,7 @@ public class LogSelectionController {
     private Stage progressDialogStage;
     private Consumer<AnalysisResult> onAnalysisCompleted;
     private Consumer<Throwable> onAnalysisFailed;
+    private ExecutorService analysisExecutor;
 
     @FXML
     private void initialize() {
@@ -144,9 +146,13 @@ public class LogSelectionController {
             task.setOnFailed(event12 -> handleFailure(path, task.getException()));
         }
 
-        Thread thread = new Thread(task, "gc-analysis-task");
-        thread.setDaemon(true);
-        thread.start();
+        if (analysisExecutor != null) {
+            analysisExecutor.submit(task);
+        } else {
+            Thread thread = new Thread(task, "gc-analysis-task");
+            thread.setDaemon(true);
+            thread.start();
+        }
 
         if (progressController != null && progressDialogStage != null) {
             progressDialogStage.show();
@@ -171,6 +177,17 @@ public class LogSelectionController {
 
     public void setOnAnalysisFailed(Consumer<Throwable> onAnalysisFailed) {
         this.onAnalysisFailed = onAnalysisFailed;
+    }
+
+    public void setAnalysisExecutor(ExecutorService analysisExecutor) {
+        this.analysisExecutor = Objects.requireNonNull(analysisExecutor, "analysisExecutor");
+    }
+
+    public void populateLogPath(Path path) {
+        Objects.requireNonNull(path, "path");
+        logPathField.setText(path.toAbsolutePath().toString());
+        statusLabel.setText("Ready to analyse " + (path.getFileName() != null ? path.getFileName() : path));
+        hideWarning();
     }
 
     private void handleFailure(Path path, Throwable throwable) {
