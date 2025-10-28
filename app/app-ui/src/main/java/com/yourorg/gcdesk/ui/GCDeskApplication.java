@@ -22,8 +22,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.web.WebView;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -123,8 +125,33 @@ public class GCDeskApplication extends Application {
         MenuItem preferencesItem = new MenuItem("Preferences...");
         preferencesItem.setOnAction(event -> showPreferencesDialog(owner));
         settingsMenu.getItems().add(preferencesItem);
-        menuBar.getMenus().add(settingsMenu);
+
+        Menu helpMenu = new Menu("Help");
+        MenuItem userManualItem = new MenuItem("User Manual");
+        userManualItem.setOnAction(event -> showHelpDocument(owner, "/com/yourorg/gcdesk/ui/help/user-manual.html", "User Manual"));
+        MenuItem tutorialsItem = new MenuItem("Guided Tutorials");
+        tutorialsItem.setOnAction(event -> showHelpDocument(owner, "/com/yourorg/gcdesk/ui/help/guided-tutorials.html", "Guided Tutorials"));
+        MenuItem onlineDocsItem = new MenuItem("Open Online Docs");
+        onlineDocsItem.setOnAction(event -> getHostServices().showDocument("https://yourorg.github.io/gctoolkit/"));
+        helpMenu.getItems().addAll(userManualItem, tutorialsItem, onlineDocsItem);
+
+        menuBar.getMenus().addAll(settingsMenu, helpMenu);
         return menuBar;
+    }
+
+    private void showHelpDocument(Stage owner, String resourcePath, String title) {
+        URL resourceUrl = getClass().getResource(resourcePath);
+        if (resourceUrl == null) {
+            throw new IllegalArgumentException("Missing help document: " + resourcePath);
+        }
+        WebView webView = new WebView();
+        webView.getEngine().load(resourceUrl.toExternalForm());
+
+        Stage helpStage = new Stage();
+        helpStage.initOwner(owner);
+        helpStage.setTitle(title);
+        helpStage.setScene(new Scene(webView, 900, 700));
+        helpStage.show();
     }
 
     private void showPreferencesDialog(Stage owner) {

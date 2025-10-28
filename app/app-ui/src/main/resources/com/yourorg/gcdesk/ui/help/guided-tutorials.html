@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GC Toolkit Guided Tutorials</title>
+    <style>
+        body { font-family: "Segoe UI", Roboto, sans-serif; margin: 0; padding: 2rem; line-height: 1.6; background: #f7f9fc; color: #1f2933; }
+        h1, h2, h3 { color: #0b3d91; }
+        section { background: #fff; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12); }
+        ul { margin-left: 1.2rem; }
+        li { margin-bottom: 0.4rem; }
+        strong { color: #0b3d91; }
+    </style>
+</head>
+<body>
+<main>
+    <section>
+        <h1>GC Toolkit Guided Tutorials</h1>
+        <p>Use these scripts to record narrated walkthroughs (screen captures, GIFs, or screenshots) that demonstrate common GC analysis workflows. Each scenario includes the recommended flow, callouts for visuals, and narration prompts.</p>
+    </section>
+
+    <section>
+        <h2>Tutorial 1 – Diagnose long GC pauses</h2>
+        <p><strong>Goal:</strong> Pinpoint the root cause of multi-second pauses affecting end-user latency.</p>
+        <ol>
+            <li><strong>Intro slide / title card</strong>
+                <ul>
+                    <li>Display: "Diagnosing Long GC Pauses".</li>
+                    <li>Narration: Introduce the affected JVM, time range, and impact.</li>
+                </ul>
+            </li>
+            <li><strong>Import the problematic logs</strong>
+                <ul>
+                    <li>Action: Click <strong>Add GC Log</strong>, select the log file, and press <strong>Analyze</strong>.</li>
+                    <li>Narration: Explain the log source (production cluster, timeframe) and mention concurrent analyses if relevant.</li>
+                    <li>Capture: Show the progress dialog highlighting parsing status.</li>
+                </ul>
+            </li>
+            <li><strong>Highlight the pause timeline</strong>
+                <ul>
+                    <li>Action: In the dashboard, zoom into the timeframe with spikes.</li>
+                    <li>Narration: Point out the longest pause duration and how it correlates with collector type (Young vs Full GC).</li>
+                    <li>Capture: Use a callout or cursor highlight on the timeline peaks.</li>
+                </ul>
+            </li>
+            <li><strong>Inspect heap usage trends</strong>
+                <ul>
+                    <li>Action: Switch to the <strong>Heap &amp; Metaspace</strong> view and hover over points before/after pauses.</li>
+                    <li>Narration: Describe memory pressure, promotion failures, or metaspace growth.</li>
+                    <li>Capture: Freeze-frame the tooltip showing pre/post heap values.</li>
+                </ul>
+            </li>
+            <li><strong>Summarize findings</strong>
+                <ul>
+                    <li>Action: Open <strong>Export ➜ HTML Report</strong> to show the summary.</li>
+                    <li>Narration: Recap key metrics and recommend tuning actions (e.g., adjust heap regions or pause goals).</li>
+                    <li>Capture: End on the generated report or a closing slide with takeaways.</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>Tutorial 2 – Validate tuning changes</h2>
+        <p><strong>Goal:</strong> Compare GC performance before and after a configuration change.</p>
+        <ol>
+            <li><strong>Intro</strong>
+                <ul>
+                    <li>Display: "Validating GC Tuning Changes" title card.</li>
+                    <li>Narration: Explain the tuning hypothesis (e.g., enabling G1 adaptive IHOP).</li>
+                </ul>
+            </li>
+            <li><strong>Import baseline and experiment logs</strong>
+                <ul>
+                    <li>Action: Queue both logs and analyze sequentially.</li>
+                    <li>Narration: Note that both runs appear in <strong>Recent Analyses</strong> for quick switching.</li>
+                </ul>
+            </li>
+            <li><strong>Use workspace history</strong>
+                <ul>
+                    <li>Action: Show how to reopen the baseline session from the sidebar.</li>
+                    <li>Narration: Emphasize side-by-side comparison without re-parsing.</li>
+                </ul>
+            </li>
+            <li><strong>Compare dashboard metrics</strong>
+                <ul>
+                    <li>Action: Highlight throughput, pause quantiles, and heap occupancy for each run.</li>
+                    <li>Narration: Describe improvements or regressions observed.</li>
+                </ul>
+            </li>
+            <li><strong>Export comparison artifacts</strong>
+                <ul>
+                    <li>Action: Export charts for both runs and assemble them in presentation slides.</li>
+                    <li>Narration: Encourage viewers to include analyst notes using the export dialog.</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>Tutorial 3 – Share crash diagnostics with support teams</h2>
+        <p><strong>Goal:</strong> Capture critical evidence for a JVM crash or fatal error.</p>
+        <ol>
+            <li><strong>Intro</strong>
+                <ul>
+                    <li>Display: "Sharing Crash Diagnostics".</li>
+                    <li>Narration: Set context—production outage, need for rapid triage.</li>
+                </ul>
+            </li>
+            <li><strong>Import the crash log</strong>
+                <ul>
+                    <li>Action: Analyze the log; spotlight warning banners that appear in the progress dialog.</li>
+                    <li>Narration: Describe how the parser flags truncated logs or unsupported sections.</li>
+                </ul>
+            </li>
+            <li><strong>Review crash markers</strong>
+                <ul>
+                    <li>Action: On the dashboard, select the event flagged as "Fatal".</li>
+                    <li>Narration: Explain metadata fields (thread, trigger, timestamp).</li>
+                </ul>
+            </li>
+            <li><strong>Export crash bundle</strong>
+                <ul>
+                    <li>Action: Use <strong>Export ➜ Crash Bundle</strong> and choose a shared directory.</li>
+                    <li>Narration: Walk through the generated ZIP contents (log excerpts, timeline snapshots, JVM info).</li>
+                </ul>
+            </li>
+            <li><strong>Closing guidance</strong>
+                <ul>
+                    <li>Narration: Encourage attaching the bundle to support tickets and linking to the User Manual for follow-up steps.</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>Recording checklist</h2>
+        <ul>
+            <li>Use a consistent theme (light or dark) for all captures.</li>
+            <li>Zoom into UI elements before highlighting them.</li>
+            <li>Provide captions or callouts for silent playback versions.</li>
+            <li>Store final media under <code>docs/media/</code> and link them from the online documentation when ready.</li>
+        </ul>
+    </section>
+</main>
+</body>
+</html>

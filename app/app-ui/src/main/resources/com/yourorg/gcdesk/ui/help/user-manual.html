@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GC Toolkit Desktop User Manual</title>
+    <style>
+        body { font-family: "Segoe UI", Roboto, sans-serif; margin: 0; padding: 2rem; line-height: 1.6; background: #f7f9fc; color: #1f2933; }
+        h1, h2, h3 { color: #0b3d91; }
+        h1 { margin-top: 0; }
+        nav { background: #0b3d91; color: #fff; padding: 1rem; margin: -2rem -2rem 2rem -2rem; }
+        nav a { color: #fff; margin-right: 1rem; text-decoration: none; font-weight: 600; }
+        nav a:hover { text-decoration: underline; }
+        section { background: #fff; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12); }
+        ul { margin-left: 1.2rem; }
+        code { background: #eef2ff; padding: 0.15rem 0.35rem; border-radius: 4px; }
+        .tip { border-left: 4px solid #10b981; padding-left: 1rem; margin: 1rem 0; background: #ecfdf5; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="#installation">Installation</a>
+    <a href="#import">Import Logs</a>
+    <a href="#dashboard">Dashboards</a>
+    <a href="#export">Export</a>
+    <a href="#troubleshooting">Troubleshooting</a>
+</nav>
+<main>
+    <section>
+        <h1>GC Toolkit Desktop User Manual</h1>
+        <p>The GC Toolkit desktop application helps you analyze Java garbage collection (GC) activity quickly and consistently. This guide walks through installation, importing logs, navigating dashboards, and exporting results.</p>
+    </section>
+
+    <section id="installation">
+        <h2>1. Installation</h2>
+        <h3>System requirements</h3>
+        <ul>
+            <li>Java 17 or later (JRE or JDK)</li>
+            <li>macOS 12+, Windows 10+, or a modern Linux distribution with JavaFX support</li>
+            <li>8 GB RAM recommended for analyzing large log sets</li>
+            <li>Internet access for downloading packaged releases (optional when installing from offline media)</li>
+        </ul>
+        <h3>Install from packaged release</h3>
+        <ol>
+            <li>Download the latest installer or ZIP from the project releases page.</li>
+            <li>Unzip or run the installer in a directory where you have write permissions.</li>
+            <li>Launch the application:
+                <ul>
+                    <li><strong>macOS/Linux:</strong> <code>./gcdesk</code> (or double-click the launcher)</li>
+                    <li><strong>Windows:</strong> <code>gcdesk.exe</code></li>
+                </ul>
+            </li>
+            <li>On first launch, confirm the default workspace and export directories.</li>
+        </ol>
+        <h3>Install from source (developers)</h3>
+        <ol>
+            <li>Ensure Java 17+ and Maven 3.9+ are installed.</li>
+            <li>Clone the repository and change into the project directory.</li>
+            <li>Run <code>./mvnw -pl app/app-ui javafx:run</code> to start the UI directly, or <code>./mvnw -pl app/app-ui -am package</code> to produce platform-specific bundles.</li>
+            <li>The packaged application appears under <code>app/app-ui/target</code>, ready to distribute.</li>
+        </ol>
+    </section>
+
+    <section id="import">
+        <h2>2. Import GC logs</h2>
+        <ol>
+            <li>Start the application and select <strong>Add GC Log</strong> on the log selection pane.</li>
+            <li>Browse to one or more GC log files (plain text or <code>.gz</code>) and open them.</li>
+            <li>Configure optional analysis parameters:
+                <ul>
+                    <li>Time zone handling (use JVM timestamps or convert to local time).</li>
+                    <li>Sampling window size for summary metrics.</li>
+                </ul>
+            </li>
+            <li>Click <strong>Analyze</strong>. The progress dialog lists parsing status and any warnings.</li>
+            <li>When analysis completes, results load in the dashboard and the log appears in <strong>Recent Analyses</strong>.</li>
+        </ol>
+        <div class="tip">
+            <strong>Tips:</strong>
+            <ul>
+                <li>Drag-and-drop files onto the log selection pane to queue them instantly.</li>
+                <li>Multi-select logs to build composite timelines for clustered JVMs.</li>
+                <li>Use the <strong>Clear</strong> action to reset the queue before starting a new investigation.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="dashboard">
+        <h2>3. Navigate the dashboards</h2>
+        <p>The workspace is split into three regions: the log selection header, the dashboard center panel, and the workspace/sidebar on the left.</p>
+        <h3>Dashboard overview</h3>
+        <ul>
+            <li><strong>Summary</strong> — key KPIs such as throughput, pause counts, and longest pause.</li>
+            <li><strong>Timeline</strong> — interactive chart showing GC events. Hover to see detailed metadata and pause durations.</li>
+            <li><strong>Heap &amp; Metaspace</strong> — area charts for memory usage before/after collection events.</li>
+            <li><strong>JVM Traces</strong> — tables listing GC events, triggers, and contributing subsystems.</li>
+        </ul>
+        <h3>Interaction patterns</h3>
+        <ul>
+            <li><strong>Zoom and pan:</strong> Scroll to zoom the timeline, drag to pan, or use the toolbar range presets (1h/6h/24h).</li>
+            <li><strong>Filter:</strong> Toggle collectors (Young, Mixed, Full) and event severities to focus on relevant data.</li>
+            <li><strong>Correlate:</strong> Selecting an event in the table highlights it in the charts and reveals detailed stats in the inspector panel.</li>
+            <li><strong>Workspace history:</strong> The left sidebar tracks previous analyses; double-click an entry to reload it.</li>
+        </ul>
+    </section>
+
+    <section id="export">
+        <h2>4. Export workflows</h2>
+        <p>Use the <strong>Export</strong> controls on the dashboard to create sharable artifacts.</p>
+        <h3>Reports</h3>
+        <ol>
+            <li>Click <strong>Export ➜ HTML Report</strong>.</li>
+            <li>Choose the destination directory (defaults to your preferences).</li>
+            <li>Enter optional analyst notes to embed in the report header.</li>
+            <li>The generated report includes summary statistics, key charts, and recommendations.</li>
+        </ol>
+        <h3>Charts and raw data</h3>
+        <ul>
+            <li><strong>Charts:</strong> Select <strong>Export ➜ Charts (PNG)</strong> to download high-resolution images of the currently visible charts.</li>
+            <li><strong>CSV:</strong> Choose <strong>Export ➜ Event Data (CSV)</strong> to capture tabular GC events for spreadsheet analysis.</li>
+        </ul>
+        <h3>Crash context bundles</h3>
+        <p>If a log contains fatal errors, <strong>Export ➜ Crash Bundle</strong> packages the log segments, JVM metadata, and timeline snapshots into a ZIP ready for incident tracking systems.</p>
+    </section>
+
+    <section id="troubleshooting">
+        <h2>5. Troubleshooting</h2>
+        <ul>
+            <li><strong>Analysis fails immediately:</strong> Confirm the log format is supported (Unified, G1, ZGC). See the console for parsing errors.</li>
+            <li><strong>Charts are blank:</strong> Ensure the log uses timestamps. Turn off filtering options that might hide all events.</li>
+            <li><strong>Long exports:</strong> Large logs may require additional heap. Increase the <strong>Analysis concurrency</strong> preference or allocate more memory.</li>
+        </ul>
+        <p>Visit the <a href="guided-tutorials.html">Guided Tutorials</a> for scenario-based walkthroughs.</p>
+    </section>
+</main>
+</body>
+</html>

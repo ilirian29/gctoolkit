@@ -62,6 +62,11 @@ Meet other developers working with GCToolKit, ask questions, and participate in 
 
 See the sample project: [sample/README](./sample/README.md)
 
+## Documentation
+
+- **Developer docs:** Review the [Developers Guide](DEVELOPERS_GUIDE.md) and [Contributing Guide](CONTRIBUTING.md).
+- **User manual & tutorials:** Visit the [documentation portal](docs/index.md) for installation steps, dashboard navigation tips, and scenario-based walkthrough scripts. The same content ships with the desktop app under the **Help** menu for offline access.
+
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for full details including more options for building and testing the project.
