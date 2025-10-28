@@ -83,9 +83,9 @@ class ReportChartGenerator {
         PieStyler styler = chart.getStyler();
         styler.setLegendVisible(true);
         styler.setLegendPosition(Styler.LegendPosition.OutsideE);
-        styler.setAnnotationType(PieStyler.AnnotationType.LabelAndPercentage);
-        styler.setAnnotationDistance(1.15);
-        styler.setDrawAllAnnotations(true);
+        styler.setLabelsVisible(true);
+        styler.setLabelsDistance(1.15);
+        styler.setForceAllLabelsVisible(true);
         styler.setPlotContentSize(0.9);
 
         counts.entrySet().stream()

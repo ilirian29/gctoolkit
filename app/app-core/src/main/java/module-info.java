@@ -3,7 +3,7 @@ module com.yourorg.gcdesk.core {
     requires com.microsoft.gctoolkit.parser;
     requires com.microsoft.gctoolkit.vertx;
     requires freemarker;
-    requires com.openhtmltopdf.pdfbox;
+    requires openhtmltopdf.pdfbox;
     requires org.knowm.xchart;
     requires java.desktop;
 
