@@ -16,8 +16,12 @@ public class XYDataSet {
         dataSeries = new ArrayList<>(series.getItems());
     }
 
-    public void add(Number x, Number y) {
+    public void add(double x, double y) {
         dataSeries.add(new com.microsoft.gctoolkit.integration.collections.XYDataSet.Point(x, y));
+    }
+
+    public void add(Number x, Number y) {
+        add(x.doubleValue(), y.doubleValue());
     }
 
     public void add(com.microsoft.gctoolkit.integration.collections.XYDataSet.Point item) {
@@ -42,7 +46,7 @@ public class XYDataSet {
     public com.microsoft.gctoolkit.integration.collections.XYDataSet scaleSeries(double scaleFactor) {
         com.microsoft.gctoolkit.integration.collections.XYDataSet scaled = new com.microsoft.gctoolkit.integration.collections.XYDataSet();
         for (com.microsoft.gctoolkit.integration.collections.XYDataSet.Point item : dataSeries) {
-            scaled.add(item.getX(), item.getY().doubleValue() * scaleFactor);
+            scaled.add(item.getX(), item.getY() * scaleFactor);
         }
         return scaled;
     }
@@ -53,15 +57,14 @@ public class XYDataSet {
      */
     public OptionalDouble maxOfY() {
         return dataSeries.stream()
-                .map(com.microsoft.gctoolkit.integration.collections.XYDataSet.Point::getY)
-                .mapToDouble(Number::doubleValue)
+                .mapToDouble(com.microsoft.gctoolkit.integration.collections.XYDataSet.Point::getY)
                 .max();
     }
 
     public com.microsoft.gctoolkit.integration.collections.XYDataSet scaleAndTranslateXAxis(double scale, double offset) {
         com.microsoft.gctoolkit.integration.collections.XYDataSet translatedSeries = new com.microsoft.gctoolkit.integration.collections.XYDataSet();
         for (com.microsoft.gctoolkit.integration.collections.XYDataSet.Point dataPoint : dataSeries) {
-            double scaledXCoordinate = (scale * dataPoint.getX().doubleValue()) + offset;
+            double scaledXCoordinate = (scale * dataPoint.getX()) + offset;
             translatedSeries.add(scaledXCoordinate, dataPoint.getY());
         }
         return translatedSeries;
@@ -76,19 +79,23 @@ public class XYDataSet {
     }
 
     public static class Point {
-        private final Number x;
-        private final Number y;
+        private final double x;
+        private final double y;
 
         public Point(Number x, Number y) {
+            this(x.doubleValue(), y.doubleValue());
+        }
+
+        public Point(double x, double y) {
             this.x = x;
             this.y = y;
         }
 
-        public Number getX() {
+        public double getX() {
             return x;
         }
 
-        public Number getY() {
+        public double getY() {
             return y;
         }
 

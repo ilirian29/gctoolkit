@@ -5,20 +5,20 @@ import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.integration.collections.XYDataSet;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 
+import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Collates(HeapOccupancyAfterCollectionAggregator.class)
 public class HeapOccupancyAfterCollectionSummary extends HeapOccupancyAfterCollectionAggregation {
 
-    private final Map<GarbageCollectionTypes, XYDataSet> aggregations = new ConcurrentHashMap<>();
+    private final EnumMap<GarbageCollectionTypes, XYDataSet> aggregations = new EnumMap<>(GarbageCollectionTypes.class);
 
     public void addDataPoint(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, long heapOccupancy) {
-        aggregations.computeIfAbsent(gcType, key -> new XYDataSet()).add(timeStamp.getTimeStamp(),heapOccupancy);
+        aggregations.computeIfAbsent(gcType, key -> new XYDataSet()).add(timeStamp.getTimeStamp(), heapOccupancy);
     }
 
     public Map<GarbageCollectionTypes, XYDataSet> get() {
-        return aggregations;
+        return Map.copyOf(aggregations);
     }
 
     @Override

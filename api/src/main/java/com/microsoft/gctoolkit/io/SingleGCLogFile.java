@@ -5,6 +5,7 @@ package com.microsoft.gctoolkit.io;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +29,8 @@ public class SingleGCLogFile extends GCLogFile {
      * @param path The path to the log file.
      */
 
+    private static final int STREAM_BUFFER_SIZE = 1 << 16;
+
     private SingleLogFileMetadata metadata = null;
 
     public SingleGCLogFile(Path path) {
@@ -50,7 +53,7 @@ public class SingleGCLogFile extends GCLogFile {
     private Stream<String> stream(LogFileMetadata metadata) throws IOException {
         Stream<String> stream = null;
         if (metadata.isPlainText()) {
-            stream = Files.lines(metadata.getPath());
+            stream = streamPlainText(metadata.getPath());
         } else if (metadata.isZip()) {
             stream = streamZipFile(metadata.getPath());
         } else if (metadata.isGZip()) {
@@ -73,12 +76,20 @@ public class SingleGCLogFile extends GCLogFile {
         do {
             entry = zipStream.getNextEntry();
         } while (entry != null && entry.isDirectory());
-        return new BufferedReader(new InputStreamReader(new BufferedInputStream(zipStream))).lines();
+        return bufferedReader(zipStream).lines();
     }
 
     private static Stream<String> streamGZipFile(Path path) throws IOException {
         GZIPInputStream gzipStream = new GZIPInputStream(Files.newInputStream(path));
-        return new BufferedReader(new InputStreamReader(new BufferedInputStream(gzipStream))).lines();
+        return bufferedReader(gzipStream).lines();
+    }
+
+    private static Stream<String> streamPlainText(Path path) throws IOException {
+        return bufferedReader(Files.newInputStream(path)).lines();
+    }
+
+    private static BufferedReader bufferedReader(InputStream stream) {
+        return new BufferedReader(new InputStreamReader(new BufferedInputStream(stream, STREAM_BUFFER_SIZE)), STREAM_BUFFER_SIZE);
     }
 
 }

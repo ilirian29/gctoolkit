@@ -8,6 +8,8 @@ import com.microsoft.gctoolkit.aggregator.Aggregator;
 import com.microsoft.gctoolkit.aggregator.EventSource;
 import com.microsoft.gctoolkit.io.DataSource;
 import com.microsoft.gctoolkit.io.GCLogFile;
+import com.microsoft.gctoolkit.io.ProgressListener;
+import com.microsoft.gctoolkit.io.ProgressUpdate;
 import com.microsoft.gctoolkit.message.ChannelName;
 import com.microsoft.gctoolkit.message.DataSourceChannel;
 import com.microsoft.gctoolkit.message.JVMEventChannel;
@@ -21,6 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.Stream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -178,7 +182,37 @@ public abstract class AbstractJavaVirtualMachine implements JavaVirtualMachine {
 
         try {
             if (finishLine.getRegisteredParties() > 0) {
-                dataSource.stream().forEach(message -> dataSourceBus.publish(ChannelName.DATA_SOURCE, message));
+                ProgressListener progressListener = dataSource.getProgressListener();
+                boolean progressEnabled = progressListener != ProgressListener.NO_OP;
+                long totalBytes = progressEnabled ? dataSource.estimateTotalBytes() : 0L;
+                LongAdder processedBytes = progressEnabled ? new LongAdder() : null;
+                long[] lastReportedBytes = progressEnabled ? new long[]{0L} : null;
+                long progressThreshold = progressEnabled && totalBytes > 0
+                        ? Math.max(1L, totalBytes / 200)
+                        : 1L << 20;
+                long startMillis = System.currentTimeMillis();
+                String endOfData = dataSource.endOfData();
+
+                if (progressEnabled) {
+                    progressListener.onProgress(new ProgressUpdate(0.0d, 0L, totalBytes, 0L, -1L));
+                }
+
+                try (Stream<String> stream = dataSource.stream()) {
+                    stream.forEach(message -> {
+                        dataSourceBus.publish(ChannelName.DATA_SOURCE, message);
+                        if (progressEnabled && !endOfData.equals(message)) {
+                            processedBytes.add(estimatedBytes(message));
+                            reportProgress(progressListener, processedBytes.sum(), totalBytes, startMillis, lastReportedBytes, progressThreshold);
+                        }
+                    });
+                }
+
+                if (progressEnabled) {
+                    long processed = processedBytes.sum();
+                    long elapsed = System.currentTimeMillis() - startMillis;
+                    progressListener.onProgress(new ProgressUpdate(1.0d, processed, totalBytes, elapsed, 0L));
+                }
+
                 finishLine.awaitAdvance(0);
             } else {
                 LOGGER.log(Level.INFO, "No Aggregations have been registered, DataSource will not be analysed.");
@@ -199,5 +233,29 @@ public abstract class AbstractJavaVirtualMachine implements JavaVirtualMachine {
             dataSourceBus.close();
             eventBus.close();
         }
+    }
+
+    private static long estimatedBytes(String message) {
+        return (message == null ? 0L : message.length() + 1L);
+    }
+
+    private void reportProgress(ProgressListener listener,
+                                long processed,
+                                long total,
+                                long startMillis,
+                                long[] lastReportedBytes,
+                                long threshold) {
+        if (processed - lastReportedBytes[0] < threshold && (total <= 0 || processed < total)) {
+            return;
+        }
+
+        double fraction = total > 0 ? Math.min(1.0d, (double) processed / (double) total) : 0.0d;
+        long elapsed = System.currentTimeMillis() - startMillis;
+        long eta = (total > 0 && fraction > 0.0d && fraction < 1.0d)
+                ? (long) (elapsed * (1.0d / fraction - 1.0d))
+                : (fraction >= 1.0d ? 0L : -1L);
+
+        listener.onProgress(new ProgressUpdate(fraction, processed, total, elapsed, eta));
+        lastReportedBytes[0] = processed;
     }
 }

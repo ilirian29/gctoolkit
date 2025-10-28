@@ -18,8 +18,12 @@ public class XYDataSet {
         dataSeries = new ArrayList<>(series.getItems());
     }
 
-    public void add(Number x, Number y) {
+    public void add(double x, double y) {
         dataSeries.add(new Point(x, y));
+    }
+
+    public void add(Number x, Number y) {
+        add(x.doubleValue(), y.doubleValue());
     }
 
     public void add(Point item) {
@@ -44,7 +48,7 @@ public class XYDataSet {
     public XYDataSet scaleSeries(double scaleFactor) {
         XYDataSet scaled = new XYDataSet();
         for (Point item : dataSeries) {
-            scaled.add(item.getX(), item.getY().doubleValue() * scaleFactor);
+            scaled.add(item.getX(), item.getY() * scaleFactor);
         }
         return scaled;
     }
@@ -55,15 +59,14 @@ public class XYDataSet {
      */
     public OptionalDouble maxOfY() {
         return dataSeries.stream()
-                .map(Point::getY)
-                .mapToDouble(Number::doubleValue)
+                .mapToDouble(Point::getY)
                 .max();
     }
 
     public XYDataSet scaleAndTranslateXAxis(double scale, double offset) {
         XYDataSet translatedSeries = new XYDataSet();
         for (Point dataPoint : dataSeries) {
-            double scaledXCoordinate = (scale * dataPoint.getX().doubleValue()) + offset;
+            double scaledXCoordinate = (scale * dataPoint.getX()) + offset;
             translatedSeries.add(scaledXCoordinate, dataPoint.getY());
         }
         return translatedSeries;
@@ -78,19 +81,23 @@ public class XYDataSet {
     }
 
     public static class Point {
-        private final Number x;
-        private final Number y;
+        private final double x;
+        private final double y;
 
         public Point(Number x, Number y) {
+            this(x.doubleValue(), y.doubleValue());
+        }
+
+        public Point(double x, double y) {
             this.x = x;
             this.y = y;
         }
 
-        public Number getX() {
+        public double getX() {
             return x;
         }
 
-        public Number getY() {
+        public double getY() {
             return y;
         }
 

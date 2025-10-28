@@ -11,6 +11,7 @@ import com.microsoft.gctoolkit.parser.datatype.TripleState;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
@@ -40,6 +41,7 @@ public abstract class GCLogFile extends FileDataSource<String> {
     private Diary diary;
     private TripleState unifiedFormat = TripleState.UNKNOWN;
     private JavaVirtualMachine jvm = null;
+    private ProgressListener progressListener = ProgressListener.NO_OP;
 
     /**
      * Subclass only.
@@ -57,6 +59,35 @@ public abstract class GCLogFile extends FileDataSource<String> {
             jvm = (isUnified()) ? new UnifiedJavaVirtualMachine() : new PreUnifiedJavaVirtualMachine();
         jvm.accepts(this);
         return jvm;
+    }
+
+    public void setProgressListener(ProgressListener listener) {
+        this.progressListener = listener == null ? ProgressListener.NO_OP : listener;
+    }
+
+    public ProgressListener getProgressListener() {
+        return progressListener;
+    }
+
+    public long estimateTotalBytes() {
+        try {
+            return getMetaData().logFiles()
+                    .map(LogFileSegment::getPath)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .mapToLong(path -> {
+                        try {
+                            return Files.size(path);
+                        } catch (IOException ioe) {
+                            LOGGER.log(Level.FINE, () -> "Unable to determine size for " + path + ": " + ioe.getMessage());
+                            return 0L;
+                        }
+                    })
+                    .sum();
+        } catch (IOException ioe) {
+            LOGGER.log(Level.FINE, () -> "Unable to estimate total bytes for " + path + ": " + ioe.getMessage());
+        }
+        return 0L;
     }
 
     /**

@@ -16,7 +16,7 @@ public class XYDataSetTest {
         var xyDataSet = new XYDataSet();
         xyDataSet.add(new Point(50, 100));
         XYDataSet scaledPoint = xyDataSet.scaleSeries(2);
-        Assertions.assertEquals(50, scaledPoint.getItems().get(0).getX());
+        Assertions.assertEquals(50.0, scaledPoint.getItems().get(0).getX());
         Assertions.assertEquals(200.0, scaledPoint.getItems().get(0).getY());
     }
 
@@ -28,7 +28,7 @@ public class XYDataSetTest {
         xyDataSet.add(new Point(75, 230));
         // added a bigger X than Y value
         xyDataSet.add(new Point(1075, 10));
-        Assertions.assertEquals(230, xyDataSet.maxOfY().getAsDouble());
+        Assertions.assertEquals(230.0, xyDataSet.maxOfY().getAsDouble());
     }
 
     @Test
@@ -37,7 +37,7 @@ public class XYDataSetTest {
         xyDataSet.add(new Point(50, 100));
         var translated = xyDataSet.scaleAndTranslateXAxis(2, 20);
         Assertions.assertEquals(120.0, translated.getItems().get(0).getX());
-        Assertions.assertEquals(100, translated.getItems().get(0).getY());
+        Assertions.assertEquals(100.0, translated.getItems().get(0).getY());
     }
 
     @Test

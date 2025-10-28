@@ -2,6 +2,8 @@ package com.microsoft.gctoolkit.sample;
 
 import com.microsoft.gctoolkit.GCToolKit;
 import com.microsoft.gctoolkit.io.GCLogFile;
+import com.microsoft.gctoolkit.io.ProgressListener;
+import com.microsoft.gctoolkit.io.ProgressUpdate;
 import com.microsoft.gctoolkit.io.SingleGCLogFile;
 import com.microsoft.gctoolkit.jvm.JavaVirtualMachine;
 import com.microsoft.gctoolkit.sample.aggregation.CollectionCycleCountsSummary;
@@ -11,6 +13,7 @@ import com.microsoft.gctoolkit.sample.aggregation.PauseTimeSummary;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Optional;
 
 public class Main {
@@ -37,7 +40,9 @@ public class Main {
          * In this sample, we load a single log file.
          * The log files can be either in text, zip, or gzip format.
          */
-        GCLogFile logFile = new SingleGCLogFile(Path.of(gcLogFile));
+        Path logPath = Path.of(gcLogFile);
+        GCLogFile logFile = new SingleGCLogFile(logPath);
+        logFile.setProgressListener(new ConsoleProgressListener(logPath));
         GCToolKit gcToolKit = new GCToolKit();
 
         /**
@@ -50,6 +55,7 @@ public class Main {
          * The JavaVirtualMachine contains the aggregations as filled out by the Aggregators.
          * It also contains configuration information about how the JVM was configured for the runtime.
          */
+        System.out.printf("Analyzing %s...%n", logPath.toAbsolutePath());
         JavaVirtualMachine machine = gcToolKit.analyze(logFile);
 
         // Retrieves the Aggregation for HeapOccupancyAfterCollectionSummary. This is a time-series aggregation.
@@ -101,5 +107,56 @@ public class Main {
 
     public int getDefNewCount() {
         return defNewCount;
+    }
+}
+
+class ConsoleProgressListener implements ProgressListener {
+
+    private final Path logPath;
+    private double lastPercent = -1.0d;
+
+    ConsoleProgressListener(Path logPath) {
+        this.logPath = logPath;
+    }
+
+    @Override
+    public synchronized void onProgress(ProgressUpdate update) {
+        if (update.isIndeterminate()) {
+            if (update.getProcessedBytes() > 0 && lastPercent < 0.0d) {
+                System.out.printf("Processed %,d KB from %s...%n",
+                        update.getProcessedBytes() / 1024,
+                        logPath.getFileName());
+            }
+            return;
+        }
+
+        double percentComplete = update.getFractionComplete() * 100.0d;
+        if (percentComplete - lastPercent < 1.0d && percentComplete < 100.0d) {
+            return;
+        }
+
+        String eta = formatEta(update.getEstimatedRemainingMillis());
+        System.out.printf("\rProcessing %s: %5.1f%%%% complete (ETA %s)",
+                logPath.getFileName(), percentComplete, eta);
+        System.out.flush();
+        lastPercent = percentComplete;
+
+        if (percentComplete >= 100.0d) {
+            System.out.println();
+        }
+    }
+
+    private String formatEta(long etaMillis) {
+        if (etaMillis < 0L) {
+            return "estimating...";
+        }
+
+        Duration duration = Duration.ofMillis(etaMillis);
+        long minutes = duration.toMinutes();
+        long seconds = duration.minusMinutes(minutes).getSeconds();
+        if (minutes > 0) {
+            return String.format("%d:%02d", minutes, seconds);
+        }
+        return String.format("%ds", seconds);
     }
 }
