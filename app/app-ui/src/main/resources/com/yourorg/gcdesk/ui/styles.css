@@ -1,0 +1,21 @@
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.header-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.subheader-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.warning-badge {
+    -fx-background-color: linear-gradient(#d35400, #c0392b);
+    -fx-text-fill: white;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 12;
+    -fx-font-weight: bold;
+}
