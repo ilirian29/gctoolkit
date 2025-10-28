@@ -51,7 +51,10 @@ public abstract class AbstractLogTrace {
     }
 
     protected double convertToDouble(String value) {
-        return Double.parseDouble(value.replaceAll(EUROPEAN_FORMAT_SEPARATOR, US_FORMAT_SEPARATOR));
+        if (value.indexOf(EUROPEAN_FORMAT_SEPARATOR) >= 0) {
+            value = value.replace(EUROPEAN_FORMAT_SEPARATOR, US_FORMAT_SEPARATOR);
+        }
+        return Double.parseDouble(value);
     }
 
     public double getPercentageGroup(int i) {

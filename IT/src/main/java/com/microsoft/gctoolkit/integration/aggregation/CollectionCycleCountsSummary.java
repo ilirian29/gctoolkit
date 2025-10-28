@@ -3,19 +3,20 @@ package com.microsoft.gctoolkit.integration.aggregation;
 import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 
 import java.io.PrintStream;
-import java.util.HashMap;
+import java.util.EnumMap;
+import java.util.concurrent.atomic.LongAdder;
 
 public class CollectionCycleCountsSummary extends CollectionCycleCountsAggregation {
 
-    private HashMap<GarbageCollectionTypes,Integer> collectionCycleCounts = new HashMap<>();
+    private final EnumMap<GarbageCollectionTypes, LongAdder> collectionCycleCounts = new EnumMap<>(GarbageCollectionTypes.class);
     @Override
     public void count(GarbageCollectionTypes gcType) {
-        collectionCycleCounts.compute(gcType, (key, value) -> value == null ? 1 : ++value);
+        collectionCycleCounts.computeIfAbsent(gcType, key -> new LongAdder()).increment();
     }
 
     private String format = "%s : %s\n";
     public void printOn(PrintStream printStream) {
-        collectionCycleCounts.keySet().forEach(k -> printStream.printf(format,k, collectionCycleCounts.get(k)));
+        collectionCycleCounts.forEach((k, v) -> printStream.printf(format, k, v.intValue()));
     }
 
     @Override

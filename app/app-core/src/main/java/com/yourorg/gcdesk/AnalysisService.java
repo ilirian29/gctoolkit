@@ -150,7 +150,7 @@ public class AnalysisService {
         for (Map.Entry<GarbageCollectionTypes, XYDataSet> entry : source.entrySet()) {
             XYDataSet dataSet = entry.getValue();
             List<XYPoint> points = dataSet.getItems().stream()
-                    .map(point -> new XYPoint(point.getX().doubleValue(), point.getY().doubleValue()))
+                    .map(point -> new XYPoint(point.getX(), point.getY()))
                     .collect(Collectors.toUnmodifiableList());
             series.put(entry.getKey(), points);
         }

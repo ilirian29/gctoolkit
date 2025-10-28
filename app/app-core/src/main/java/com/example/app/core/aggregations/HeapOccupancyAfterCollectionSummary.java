@@ -4,12 +4,12 @@ import com.example.app.core.collections.XYDataSet;
 import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 
+import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class HeapOccupancyAfterCollectionSummary extends HeapOccupancyAfterCollectionAggregation {
 
-    private final Map<GarbageCollectionTypes, XYDataSet> aggregations = new ConcurrentHashMap<>();
+    private final EnumMap<GarbageCollectionTypes, XYDataSet> aggregations = new EnumMap<>(GarbageCollectionTypes.class);
 
     @Override
     public void addDataPoint(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, long heapOccupancy) {

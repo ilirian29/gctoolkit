@@ -3,26 +3,26 @@ package com.example.app.core.aggregations;
 import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 
 import java.io.PrintStream;
+import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 
 public class CollectionCycleCountsSummary extends CollectionCycleCountsAggregation {
 
-    private final Map<GarbageCollectionTypes, AtomicInteger> collectionCycleCounts = new ConcurrentHashMap<>();
+    private final EnumMap<GarbageCollectionTypes, LongAdder> collectionCycleCounts = new EnumMap<>(GarbageCollectionTypes.class);
 
     @Override
     public void count(GarbageCollectionTypes gcType) {
-        collectionCycleCounts.computeIfAbsent(gcType, key -> new AtomicInteger()).incrementAndGet();
+        collectionCycleCounts.computeIfAbsent(gcType, key -> new LongAdder()).increment();
     }
 
     public Map<GarbageCollectionTypes, Integer> getCounts() {
         return collectionCycleCounts.entrySet().stream().collect(
-                java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().get()));
+                java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().intValue()));
     }
 
     public void printOn(PrintStream printStream) {
-        collectionCycleCounts.forEach((k, v) -> printStream.printf("%s : %s%n", k, v));
+        collectionCycleCounts.forEach((k, v) -> printStream.printf("%s : %s%n", k, v.intValue()));
     }
 
     @Override
