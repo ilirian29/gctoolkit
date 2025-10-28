@@ -16,6 +16,9 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <gctoolkit.version>3.7.0</gctoolkit.version>
+        <freemarker.version>2.3.32</freemarker.version>
+        <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
+        <xchart.version>3.8.6</xchart.version>
     </properties>
 
     <modules>
@@ -89,6 +92,21 @@
                 <groupId>com.microsoft.gctoolkit</groupId>
                 <artifactId>vertx</artifactId>
                 <version>${gctoolkit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.openhtmltopdf</groupId>
+                <artifactId>openhtmltopdf-pdfbox</artifactId>
+                <version>${openhtmltopdf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchart</groupId>
+                <artifactId>xchart</artifactId>
+                <version>${xchart.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

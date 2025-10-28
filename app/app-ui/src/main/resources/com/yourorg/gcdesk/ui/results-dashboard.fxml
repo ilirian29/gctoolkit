@@ -21,6 +21,14 @@
                         <Label fx:id="analyzedAtLabel" text="-" />
                     </children>
                 </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Export report:" />
+                        <ComboBox fx:id="exportFormatChoice" prefWidth="160" />
+                        <Button fx:id="exportButton" text="Generate" onAction="#onExportReport" />
+                        <Label fx:id="exportStatusLabel" text="" />
+                    </children>
+                </HBox>
             </children>
         </VBox>
     </top>

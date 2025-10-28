@@ -1,5 +1,6 @@
 package com.yourorg.gcdesk.ui;
 
+import com.example.app.core.reporting.ReportService;
 import com.yourorg.gcdesk.AnalysisService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -42,6 +43,7 @@ public class GCDeskApplication extends Application {
         progressController.setOnDismiss(progressStage::hide);
 
         AnalysisService analysisService = new AnalysisService();
+        ReportService reportService = new ReportService();
         logSelectionController.setAnalysisService(analysisService);
         logSelectionController.setAnalysisProgressController(progressController);
         logSelectionController.setProgressDialogStage(progressStage);
@@ -50,6 +52,7 @@ public class GCDeskApplication extends Application {
             dashboardController.displayResult(result);
         });
         logSelectionController.setOnAnalysisFailed(throwable -> progressStage.hide());
+        dashboardController.setReportService(reportService);
 
         BorderPane root = new BorderPane();
         root.setTop(logSelectionView);
