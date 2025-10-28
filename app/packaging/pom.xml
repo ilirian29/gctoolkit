@@ -13,6 +13,12 @@
     <artifactId>packaging</artifactId>
     <name>Example Application Packaging</name>
 
+    <properties>
+        <javafx.version>21.0.2</javafx.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
+        <javafx.platform>${os.detected.jfxname}</javafx.platform>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.example.app</groupId>
@@ -22,10 +28,49 @@
             <groupId>com.example.app</groupId>
             <artifactId>app-ui</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.google.osdetector</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>detect</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx.maven.plugin.version}</version>
+                <configuration>
+                    <launcher>com.yourorg.gcdesk/com.yourorg.gcdesk.DesktopLauncher</launcher>
+                    <mainClass>com.yourorg.gcdesk.DesktopLauncher</mainClass>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -44,13 +89,23 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
-                                        <exclude>META-INF/services/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>io.vertx</pattern>
+                                    <shadedPattern>com.yourorg.gcdesk.shadow.vertx</shadedPattern>
+                                </relocation>
+                            </relocations>
                             <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer">
+                                    <includes>
+                                        <include>META-INF/services/com.microsoft.gctoolkit.spi.*</include>
+                                    </includes>
+                                </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.example.app.ui.Main</mainClass>
+                                    <mainClass>com.yourorg.gcdesk.DesktopLauncher</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
