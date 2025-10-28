@@ -28,7 +28,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
 import java.nio.file.Path;
@@ -38,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -119,6 +119,7 @@ public class ResultsDashboardController {
             .withLocale(Locale.getDefault());
     private ReportService reportService = new ReportService();
     private AnalysisResult currentResult;
+    private Supplier<DirectoryChooserAdapter> directoryChooserFactory = FXDirectoryChooserAdapter::new;
 
     @FXML
     private void initialize() {
@@ -202,7 +203,7 @@ public class ResultsDashboardController {
             return;
         }
 
-        DirectoryChooser chooser = new DirectoryChooser();
+        DirectoryChooserAdapter chooser = directoryChooserFactory.get();
         chooser.setTitle("Select export directory");
         java.io.File directory = chooser.showDialog(window);
         if (directory == null) {
@@ -313,6 +314,10 @@ public class ResultsDashboardController {
         updateExportControls();
     }
 
+    public void setDirectoryChooserFactory(Supplier<DirectoryChooserAdapter> directoryChooserFactory) {
+        this.directoryChooserFactory = Objects.requireNonNull(directoryChooserFactory, "directoryChooserFactory");
+    }
+
     private void updateExportControls() {
         if (exportButton != null) {
             boolean disable = currentResult == null;
@@ -394,6 +399,26 @@ public class ResultsDashboardController {
 
         public IntegerProperty countProperty() {
             return count;
+        }
+    }
+
+    interface DirectoryChooserAdapter {
+        void setTitle(String title);
+
+        java.io.File showDialog(Window owner);
+    }
+
+    private static class FXDirectoryChooserAdapter implements DirectoryChooserAdapter {
+        private final javafx.stage.DirectoryChooser delegate = new javafx.stage.DirectoryChooser();
+
+        @Override
+        public void setTitle(String title) {
+            delegate.setTitle(title);
+        }
+
+        @Override
+        public java.io.File showDialog(Window owner) {
+            return delegate.showDialog(owner);
         }
     }
 }

@@ -8,6 +8,7 @@
         <groupId>com.example.app</groupId>
         <artifactId>app-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../app-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>app-core</artifactId>
@@ -16,15 +17,15 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.gctoolkit</groupId>
-            <artifactId>api</artifactId>
+            <artifactId>gctoolkit-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.microsoft.gctoolkit</groupId>
-            <artifactId>parser</artifactId>
+            <artifactId>gctoolkit-parser</artifactId>
         </dependency>
         <dependency>
             <groupId>com.microsoft.gctoolkit</groupId>
-            <artifactId>vertx</artifactId>
+            <artifactId>gctoolkit-vertx</artifactId>
         </dependency>
         <dependency>
             <groupId>org.freemarker</groupId>
@@ -37,6 +38,16 @@
         <dependency>
             <groupId>org.knowm.xchart</groupId>
             <artifactId>xchart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

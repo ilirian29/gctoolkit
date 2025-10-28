@@ -123,7 +123,7 @@
     </#list>
 </ul>
 
-<#if hasCharts>
+<#if charts?has_content>
     <h2>Visual trends</h2>
     <#list charts as chart>
         <div class="chart">
@@ -135,7 +135,7 @@
 </#if>
 
 <h2>GC cause breakdown</h2>
-<#if hasCauseRows>
+<#if causeRows?has_content>
     <table>
         <tr>
             <th>Cause</th>
@@ -155,7 +155,7 @@
 </#if>
 
 <h2>Collection cycle counts</h2>
-<#if hasCycleRows>
+<#if cycleRows?has_content>
     <table>
         <tr>
             <th>GC type</th>

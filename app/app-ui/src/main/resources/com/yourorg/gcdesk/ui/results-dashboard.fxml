@@ -6,7 +6,10 @@
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.yourorg.gcdesk.ui.ResultsDashboardController" stylesheets="@styles.css">
     <top>
-        <VBox spacing="6" padding="10">
+        <VBox spacing="6">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
             <children>
                 <Label text="Analysis results" styleClass="header-label" />
                 <HBox spacing="10" alignment="CENTER_LEFT">
@@ -37,7 +40,10 @@
             <tabs>
                 <Tab text="Timelines">
                     <content>
-                        <BorderPane padding="10">
+                        <BorderPane>
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <top>
                                 <Label fx:id="timelineWarningBadge" visible="false" managed="false" styleClass="warning-badge" />
                             </top>
@@ -58,7 +64,10 @@
                     <content>
                         <SplitPane orientation="VERTICAL">
                             <items>
-                                <VBox spacing="6" padding="10">
+                                <VBox spacing="6">
+                                    <padding>
+                                        <Insets top="10" right="10" bottom="10" left="10" />
+                                    </padding>
                                     <children>
                                         <Label text="GC cause breakdown" styleClass="subheader-label" />
                                         <TableView fx:id="causeTable" prefHeight="250">
@@ -70,7 +79,10 @@
                                         </TableView>
                                     </children>
                                 </VBox>
-                                <VBox spacing="6" padding="10">
+                                <VBox spacing="6">
+                                    <padding>
+                                        <Insets top="10" right="10" bottom="10" left="10" />
+                                    </padding>
                                     <children>
                                         <Label text="Collection cycle counts" styleClass="subheader-label" />
                                         <TableView fx:id="cycleTable" prefHeight="200">
@@ -87,7 +99,10 @@
                 </Tab>
                 <Tab text="Summary">
                     <content>
-                        <VBox spacing="12" padding="10">
+                        <VBox spacing="12">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <children>
                                 <Label fx:id="summaryWarningBadge" visible="false" managed="false" styleClass="warning-badge" />
                                 <GridPane hgap="12" vgap="8">
