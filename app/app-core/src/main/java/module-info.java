@@ -22,6 +22,7 @@ module com.yourorg.gcdesk.core {
     exports com.example.app.core.reporting;
     exports com.example.app.core.logging;
     exports com.yourorg.gcdesk.preferences;
+    exports com.yourorg.gcdesk.plugins;
 
     provides com.microsoft.gctoolkit.aggregator.Aggregation with
             com.example.app.core.aggregations.HeapOccupancyAfterCollectionSummary,
@@ -29,4 +30,7 @@ module com.yourorg.gcdesk.core {
             com.example.app.core.aggregations.CollectionCycleCountsSummary,
             com.example.app.core.aggregations.DesktopPausePercentileSummary,
             com.example.app.core.aggregations.DesktopGCCauseFrequencySummary;
+
+    uses com.yourorg.gcdesk.plugins.GCDeskPlugin;
+    uses com.microsoft.gctoolkit.aggregator.Aggregation;
 }

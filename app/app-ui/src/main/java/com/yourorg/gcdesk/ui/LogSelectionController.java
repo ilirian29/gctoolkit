@@ -5,6 +5,11 @@ import com.yourorg.gcdesk.AnalysisException;
 import com.yourorg.gcdesk.AnalysisService;
 import com.yourorg.gcdesk.CrashReportService;
 import com.yourorg.gcdesk.model.AnalysisResult;
+import com.yourorg.gcdesk.plugins.PluginDescriptor;
+import com.yourorg.gcdesk.plugins.PluginRegistry;
+import com.yourorg.gcdesk.plugins.PluginStatus;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -14,7 +19,10 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -52,6 +60,12 @@ public class LogSelectionController {
     @FXML
     private Label warningBadge;
 
+    @FXML
+    private Label pluginSummaryLabel;
+
+    @FXML
+    private ListView<PluginDescriptor> pluginListView;
+
     private AnalysisService analysisService = new AnalysisService();
     private CrashReportService crashReportService = new CrashReportService();
     private AnalysisProgressController progressController;
@@ -59,6 +73,7 @@ public class LogSelectionController {
     private Consumer<AnalysisResult> onAnalysisCompleted;
     private Consumer<Throwable> onAnalysisFailed;
     private ExecutorService analysisExecutor;
+    private PluginRegistry pluginRegistry = analysisService.getPluginRegistry();
 
     @FXML
     private void initialize() {
@@ -68,6 +83,53 @@ public class LogSelectionController {
         analyzeButton.disableProperty().bind(Bindings.createBooleanBinding(
                 () -> logPathField.getText() == null || logPathField.getText().trim().isEmpty(),
                 logPathField.textProperty()));
+
+        if (pluginListView != null) {
+            pluginListView.setCellFactory(list -> new ListCell<>() {
+                @Override
+                protected void updateItem(PluginDescriptor descriptor, boolean empty) {
+                    super.updateItem(descriptor, empty);
+                    if (empty || descriptor == null) {
+                        setText(null);
+                        setTooltip(null);
+                        return;
+                    }
+                    String statusText = switch (descriptor.status()) {
+                        case LOADED -> "Loaded";
+                        case INCOMPATIBLE -> "Incompatible";
+                        case FAILED -> "Failed";
+                    };
+                    StringBuilder text = new StringBuilder();
+                    text.append(descriptor.name() != null ? descriptor.name() : descriptor.id());
+                    if (descriptor.version() != null && !descriptor.version().isBlank() && !"-".equals(descriptor.version())) {
+                        text.append(' ').append(descriptor.version());
+                    }
+                    text.append(" – ").append(statusText);
+                    String detail = !descriptor.errors().isEmpty() ? descriptor.errors().get(0)
+                            : (!descriptor.warnings().isEmpty() ? descriptor.warnings().get(0) : "");
+                    if (!detail.isBlank()) {
+                        text.append(": ").append(detail);
+                    }
+                    setText(text.toString());
+
+                    StringBuilder tooltip = new StringBuilder();
+                    if (descriptor.description() != null && !descriptor.description().isBlank()) {
+                        tooltip.append(descriptor.description());
+                    }
+                    if (!descriptor.providedAggregations().isEmpty()) {
+                        if (tooltip.length() > 0) {
+                            tooltip.append('\n');
+                        }
+                        tooltip.append("Aggregations: ")
+                                .append(String.join(", ", descriptor.providedAggregations()));
+                    }
+                    setTooltip(tooltip.length() > 0 ? new Tooltip(tooltip.toString()) : null);
+                }
+            });
+            pluginListView.setFocusTraversable(false);
+        }
+
+        updatePluginStatus();
     }
 
     @FXML
@@ -161,6 +223,12 @@ public class LogSelectionController {
 
     public void setAnalysisService(AnalysisService analysisService) {
         this.analysisService = Objects.requireNonNull(analysisService, "analysisService");
+        setPluginRegistry(analysisService.getPluginRegistry());
+    }
+
+    public void setPluginRegistry(PluginRegistry pluginRegistry) {
+        this.pluginRegistry = pluginRegistry;
+        updatePluginStatus();
     }
 
     public void setAnalysisProgressController(AnalysisProgressController progressController) {
@@ -188,6 +256,36 @@ public class LogSelectionController {
         logPathField.setText(path.toAbsolutePath().toString());
         statusLabel.setText("Ready to analyse " + (path.getFileName() != null ? path.getFileName() : path));
         hideWarning();
+    }
+
+    private void updatePluginStatus() {
+        if (pluginSummaryLabel == null || pluginListView == null) {
+            return;
+        }
+        ObservableList<PluginDescriptor> items = pluginListView.getItems();
+        if (items == null) {
+            pluginListView.setItems(FXCollections.observableArrayList());
+            items = pluginListView.getItems();
+        }
+        if (pluginRegistry == null) {
+            items.clear();
+            pluginSummaryLabel.setText("Plug-in discovery has not run yet.");
+            return;
+        }
+        items.setAll(pluginRegistry.descriptors());
+        long total = pluginRegistry.descriptors().size();
+        long active = pluginRegistry.activeCount();
+        long failed = pluginRegistry.failureCount();
+        StringBuilder summary = new StringBuilder();
+        if (total == 0) {
+            summary.append("No plug-ins were discovered.");
+        } else {
+            summary.append(String.format(java.util.Locale.ROOT, "Loaded %d of %d plug-ins.", active, total));
+            if (failed > 0) {
+                summary.append(' ').append(String.format(java.util.Locale.ROOT, "%d failed to load.", failed));
+            }
+        }
+        pluginSummaryLabel.setText(summary.toString());
     }
 
     private void handleFailure(Path path, Throwable throwable) {

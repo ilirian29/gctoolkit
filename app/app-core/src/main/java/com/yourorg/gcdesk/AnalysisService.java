@@ -19,6 +19,8 @@ import com.yourorg.gcdesk.model.GCCauseSummary;
 import com.yourorg.gcdesk.model.HeapOccupancySummary;
 import com.yourorg.gcdesk.model.HeapOccupancySummary.XYPoint;
 import com.yourorg.gcdesk.model.PauseStatistics;
+import com.yourorg.gcdesk.plugins.PluginManager;
+import com.yourorg.gcdesk.plugins.PluginRegistry;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,6 +46,8 @@ public class AnalysisService {
 
     private final Map<UUID, AnalysisResult> analysisCache = new ConcurrentHashMap<>();
     private final Map<Path, UUID> pathIndex = new ConcurrentHashMap<>();
+    private final PluginManager pluginManager;
+    private final PluginRegistry pluginRegistry;
 
     /**
      * Analyse the supplied GC log and return the aggregated results. If the log has been processed
@@ -69,6 +73,7 @@ public class AnalysisService {
         GCLogFile logFile = createLogFile(normalized);
         GCToolKit toolKit = new GCToolKit();
         toolKit.loadAggregationsFromServiceLoader();
+        pluginManager.registerWith(toolKit);
         JavaVirtualMachine machine = null;
         try {
             LOGGER.info("Starting GC analysis for {}", normalized);
@@ -115,6 +120,28 @@ public class AnalysisService {
             return new RotatingGCLogFile(path);
         }
         return new SingleGCLogFile(path);
+    }
+
+    /**
+     * Construct an analysis service using the default plug-in directory.
+     */
+    public AnalysisService() {
+        this(new PluginManager());
+    }
+
+    /**
+     * Visible for testing.
+     */
+    AnalysisService(PluginManager pluginManager) {
+        this.pluginManager = Objects.requireNonNull(pluginManager, "pluginManager");
+        this.pluginRegistry = pluginManager.getRegistry();
+    }
+
+    /**
+     * @return immutable view of discovered plug-ins.
+     */
+    public PluginRegistry getPluginRegistry() {
+        return pluginRegistry;
     }
 
     private AnalysisResult buildAnalysisResult(UUID analysisId, Path source, JavaVirtualMachine machine) {

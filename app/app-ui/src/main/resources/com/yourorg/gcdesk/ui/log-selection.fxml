@@ -24,5 +24,17 @@
             </children>
         </HBox>
         <Label fx:id="statusLabel" text="Select a GC log to begin." wrapText="true" />
+        <TitledPane text="Plug-ins" expanded="false">
+            <content>
+                <VBox spacing="6">
+                    <Label fx:id="pluginSummaryLabel" wrapText="true" />
+                    <ListView fx:id="pluginListView" prefHeight="140">
+                        <placeholder>
+                            <Label text="No plug-ins discovered. Place plug-in JARs in the plugins/ directory." wrapText="true" />
+                        </placeholder>
+                    </ListView>
+                </VBox>
+            </content>
+        </TitledPane>
     </children>
 </VBox>
